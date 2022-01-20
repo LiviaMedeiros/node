@@ -586,7 +586,7 @@ changes:
                  buffers anymore.
 -->
 
-* `buffer` {Buffer|TypedArray|DataView|string|Object}
+* `buffer` {Buffer|TypedArray|DataView}
 * `offset` {integer} The start position from within `buffer` where the data
   to write begins. **Default:** `0`
 * `length` {integer} The number of bytes from `buffer` to write. **Default:**
@@ -599,13 +599,10 @@ changes:
 
 Write `buffer` to the file.
 
-If `buffer` is a plain object, it must have an own (not inherited) `toString`
-function property.
-
 The promise is resolved with an object containing two properties:
 
 * `bytesWritten` {integer} the number of bytes written
-* `buffer` {Buffer|TypedArray|DataView|string|Object} a reference to the
+* `buffer` {Buffer|TypedArray|DataView} a reference to the
   `buffer` written.
 
 It is unsafe to use `filehandle.write()` multiple times on the same file
@@ -615,6 +612,25 @@ scenario, use [`fs.createWriteStream()`][].
 On Linux, positional writes do not work when the file is opened in append mode.
 The kernel ignores the position argument and always appends the data to
 the end of the file.
+
+#### `filehandle.write(buffer, options)`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* `buffer` {Buffer|TypedArray|DataView}
+* `options` {Object}
+  * `offset` {integer} **Default:** `0`
+  * `length` {integer} **Default:** `buffer.byteLength`
+  * `position` {integer} **Default:** `null`
+* Returns: {Promise}
+
+Write `buffer` to the file.
+
+Similar to the above `filehandle.write` function, this version takes an
+optional `options` object. If no `options` object is specified, it will
+default with the above values.
 
 #### `filehandle.write(string[, position[, encoding]])`
 
@@ -631,7 +647,7 @@ changes:
                  strings anymore.
 -->
 
-* `string` {string|Object}
+* `string` {string}
 * `position` {integer} The offset from the beginning of the file where the
   data from `string` should be written. If `position` is not a `number` the
   data will be written at the current position. See the POSIX pwrite(2)
@@ -639,13 +655,13 @@ changes:
 * `encoding` {string} The expected string encoding. **Default:** `'utf8'`
 * Returns: {Promise}
 
-Write `string` to the file. If `string` is not a string, or an object with an
-own `toString` function property, the promise is rejected with an error.
+Write `string` to the file. If `string` is not a string, the promise is
+rejected with an error.
 
 The promise is resolved with an object containing two properties:
 
 * `bytesWritten` {integer} the number of bytes written
-* `buffer` {string|Object} a reference to the `string` written.
+* `buffer` {string} a reference to the `string` written.
 
 It is unsafe to use `filehandle.write()` multiple times on the same file
 without waiting for the promise to be resolved (or rejected). For this
@@ -4161,7 +4177,7 @@ changes:
 -->
 
 * `fd` {integer}
-* `buffer` {Buffer|TypedArray|DataView|string|Object}
+* `buffer` {Buffer|TypedArray|DataView}
 * `offset` {integer}
 * `length` {integer}
 * `position` {integer}
@@ -4170,8 +4186,7 @@ changes:
   * `bytesWritten` {integer}
   * `buffer` {Buffer|TypedArray|DataView}
 
-Write `buffer` to the file specified by `fd`. If `buffer` is a normal object, it
-must have an own `toString` function property.
+Write `buffer` to the file specified by `fd`.
 
 `offset` determines the part of the buffer to be written, and `length` is
 an integer specifying the number of bytes to write.
@@ -5542,14 +5557,28 @@ changes:
 -->
 
 * `fd` {integer}
-* `buffer` {Buffer|TypedArray|DataView|string|Object}
+* `buffer` {Buffer|TypedArray|DataView}
 * `offset` {integer}
 * `length` {integer}
 * `position` {integer}
 * Returns: {number} The number of bytes written.
 
-If `buffer` is a plain object, it must have an own (not inherited) `toString`
-function property.
+For detailed information, see the documentation of the asynchronous version of
+this API: [`fs.write(fd, buffer...)`][].
+
+### `fs.writeSync(fd, buffer, options)`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* `fd` {integer}
+* `buffer` {Buffer|TypedArray|DataView}
+* `options` {Object}
+  * `offset` {integer} **Default:** `0`
+  * `length` {integer} **Default:** `buffer.byteLength`
+  * `position` {integer} **Default:** `null`
+* Returns: {number} The number of bytes written.
 
 For detailed information, see the documentation of the asynchronous version of
 this API: [`fs.write(fd, buffer...)`][].
@@ -5573,13 +5602,10 @@ changes:
 -->
 
 * `fd` {integer}
-* `string` {string|Object}
+* `string` {string}
 * `position` {integer}
 * `encoding` {string}
 * Returns: {number} The number of bytes written.
-
-If `string` is a plain object, it must have an own (not inherited) `toString`
-function property.
 
 For detailed information, see the documentation of the asynchronous version of
 this API: [`fs.write(fd, string...)`][].
