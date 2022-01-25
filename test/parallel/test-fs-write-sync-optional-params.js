@@ -71,6 +71,23 @@ const buffer = Buffer.from('zyx');
       'It must be >= 0 && <= 9007199254740991. Received -1'
   });
 
+  // Test if object is not interpreted as string
+  for (const buffer of [
+    {},
+    new Date(),
+    new String('notPrimitive'),
+    { toString() { return 'amObject'; } },
+    { [Symbol.toPrimitive]: (hint) => 'amObject' },
+  ]) {
+    assert.throws(() => {
+      fs.writeSync(fd, buffer);
+    }, {
+      code: 'ERR_INVALID_ARG_TYPE',
+      name: 'TypeError',
+      message: /^The "buffer" argument must be of type string or an instance of Buffer, TypedArray, or DataView/
+    });
+  }
+
   fs.closeSync(fd);
 
   for (const params of [
