@@ -13,7 +13,7 @@ const dest = path.resolve(tmpdir.path, 'tmp.txt');
 const buffer = Buffer.from('zyx');
 
 (async () => {
-  const fh = await fsPromises.open(dest, 'w+');
+  let fh = await fsPromises.open(dest, 'w+');
 
   assert.rejects(async () => {
     await fh.write(
@@ -96,6 +96,8 @@ const buffer = Buffer.from('zyx');
       'It must be >= 0 && <= 9007199254740991. Received -1'
   });
 
+  await fh.close();
+
   for (const params of [
     { buffer },
     { buffer, length: 1 },
@@ -104,6 +106,7 @@ const buffer = Buffer.from('zyx');
     { buffer, length: 1, position: -1, offset: 2 },
     { buffer, length: null },
   ]) {
+    fh = await fsPromises.open(dest, 'w+');
     const writeResult = await fh.write(params);
     const writeBufCopy = Uint8Array.prototype.slice.call(writeResult.buffer);
     const readResult = await fh.read(params);
@@ -118,5 +121,6 @@ const buffer = Buffer.from('zyx');
       assert.deepStrictEqual(writeBufCopy, readBufCopy);
     }
     assert.deepStrictEqual(writeResult.buffer, readResult.buffer);
+    await fh.close();
   }
 })().then(common.mustCall());
