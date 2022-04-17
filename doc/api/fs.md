@@ -5393,7 +5393,7 @@ Similar to the above `fs.readSync` function, this version takes an optional `opt
 If no `options` object is specified, it will default with the above values.
 
 For detailed information, see the documentation of the asynchronous version of
-this API: [`fs.read()`][].
+this API: [`fs.read()`][`fs.read(fd, options, callback)`].
 
 ### `fs.readvSync(fd, buffers[, position])`
 
@@ -7492,6 +7492,7 @@ the file contents.
 [`fs.opendir()`]: #fsopendirpath-options-callback
 [`fs.opendirSync()`]: #fsopendirsyncpath-options
 [`fs.read()`]: #fsreadfd-buffer-offset-length-position-callback
+[`fs.read(fd, options, callback)`]: #fsreadfd-options-callback
 [`fs.readFile()`]: #fsreadfilepath-options-callback
 [`fs.readFileSync()`]: #fsreadfilesyncpath-options
 [`fs.readdir()`]: #fsreaddirpath-options-callback
