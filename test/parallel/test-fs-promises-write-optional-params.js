@@ -20,7 +20,7 @@ async function testInvalid(dest, expectedCode, ...params) {
   try {
     fh = await fsPromises.open(dest, 'w+');
     await assert.rejects(
-      async () => fh.write(...params),
+      fh.write(...params),
       { code: expectedCode });
   } finally {
     await fh?.close();
@@ -54,7 +54,8 @@ async function testValid(dest, buffer, options) {
 (async () => {
   // Test if first argument is not wrongly interpreted as ArrayBufferView|string
   for (const badBuffer of [
-    undefined, null, true, 42, 42n, Symbol('42'), NaN, [],
+    undefined, null, true, 42, 42n, Symbol('42'), NaN, [], () => {},
+    Promise.resolve(new Uint8Array(1)),
     {},
     { buffer: 'amNotParam' },
     { string: 'amNotParam' },
@@ -76,6 +77,8 @@ async function testValid(dest, buffer, options) {
   await testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { length: 1, offset: 3 });
   await testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { length: -1 });
   await testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { offset: -1 });
+  await testInvalid(dest, 'ERR_INVALID_ARG_TYPE', buffer, { offset: false });
+  await testInvalid(dest, 'ERR_INVALID_ARG_TYPE', buffer, { offset: true });
 
   // Test compatibility with filehandle.read counterpart
   for (const options of [
@@ -85,6 +88,7 @@ async function testValid(dest, buffer, options) {
     { length: 1, position: 5 },
     { length: 1, position: -1, offset: 2 },
     { length: null },
+    { position: null },
     { offset: 1 },
   ]) {
     await testValid(dest, buffer, options);
