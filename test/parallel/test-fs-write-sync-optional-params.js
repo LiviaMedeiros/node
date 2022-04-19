@@ -15,28 +15,28 @@ tmpdir.refresh();
 const dest = path.resolve(tmpdir.path, 'tmp.txt');
 const buffer = Buffer.from('zyx');
 
-function testInvalid(dest, expectedCode, ...bufferAndParams) {
+function testInvalid(dest, expectedCode, ...bufferAndOptions) {
   let fd;
   try {
     fd = fs.openSync(dest, 'w+');
     assert.throws(
-      () => fs.writeSync(fd, ...bufferAndParams),
+      () => fs.writeSync(fd, ...bufferAndOptions),
       { code: expectedCode });
   } finally {
     if (fd != null) fs.closeSync(fd);
   }
 }
 
-function testValid(dest, buffer, params) {
+function testValid(dest, buffer, options) {
   let fd;
   try {
     fd = fs.openSync(dest, 'w+');
-    const bytesWritten = fs.writeSync(fd, buffer, params);
-    const bytesRead = fs.readSync(fd, buffer, params);
+    const bytesWritten = fs.writeSync(fd, buffer, options);
+    const bytesRead = fs.readSync(fd, buffer, options);
 
     assert.ok(bytesWritten >= bytesRead);
-    if (params.length !== undefined && params.length !== null) {
-      assert.strictEqual(bytesWritten, params.length);
+    if (options.length !== undefined && options.length !== null) {
+      assert.strictEqual(bytesWritten, options.length);
     }
   } finally {
     if (fd != null) fs.closeSync(fd);
@@ -44,7 +44,7 @@ function testValid(dest, buffer, params) {
 }
 
 {
-  // Test if second argument is not wrongly interpreted as string or params
+  // Test if second argument is not wrongly interpreted as string or options
   for (const badBuffer of [
     undefined, null, true, 42, 42n, Symbol('42'), NaN, [],
     {},
@@ -60,15 +60,15 @@ function testValid(dest, buffer, params) {
     testInvalid(dest, 'ERR_INVALID_ARG_TYPE', badBuffer);
   }
 
-  // Various invalid params
+  // Various invalid options
   testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { length: 5 });
   testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { offset: 5 });
   testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { length: 1, offset: 3 });
   testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { length: -1 });
   testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { offset: -1 });
 
-  // Test compatibility with fs.readSync counterpart with reused params
-  for (const params of [
+  // Test compatibility with fs.readSync counterpart with reused options
+  for (const options of [
     {},
     { length: 1 },
     { position: 5 },
@@ -77,6 +77,6 @@ function testValid(dest, buffer, params) {
     { length: null },
     { offset: 1 },
   ]) {
-    testValid(dest, buffer, params);
+    testValid(dest, buffer, options);
   }
 }

@@ -15,32 +15,34 @@ tmpdir.refresh();
 const dest = path.resolve(tmpdir.path, 'tmp.txt');
 const buffer = Buffer.from('zyx');
 
-async function testInvalid(dest, expectedCode, params) {
+async function testInvalid(dest, expectedCode, ...params) {
   let fh;
   try {
     fh = await fsPromises.open(dest, 'w+');
     await assert.rejects(
-      async () => fh.write(params),
+      async () => fh.write(...params),
       { code: expectedCode });
   } finally {
     await fh?.close();
   }
 }
 
-async function testValid(dest, params) {
+async function testValid(dest, buffer, options) {
   let fh;
   try {
     fh = await fsPromises.open(dest, 'w+');
-    const writeResult = await fh.write(params);
+    const writeResult = await fh.write(buffer, options);
     const writeBufCopy = Uint8Array.prototype.slice.call(writeResult.buffer);
-    const readResult = await fh.read(params);
+
+    // TODO: replace this with fh.read(buffer, options) if it is supported
+    const readResult = await fh.read({ buffer, ...options });
     const readBufCopy = Uint8Array.prototype.slice.call(readResult.buffer);
 
     assert.ok(writeResult.bytesWritten >= readResult.bytesRead);
-    if (params.length !== undefined && params.length !== null) {
-      assert.strictEqual(writeResult.bytesWritten, params.length);
+    if (options.length !== undefined && options.length !== null) {
+      assert.strictEqual(writeResult.bytesWritten, options.length);
     }
-    if (params.offset === undefined || params.offset === 0) {
+    if (options.offset === undefined || options.offset === 0) {
       assert.deepStrictEqual(writeBufCopy, readBufCopy);
     }
     assert.deepStrictEqual(writeResult.buffer, readResult.buffer);
@@ -51,7 +53,7 @@ async function testValid(dest, params) {
 
 (async () => {
   // Test if first argument is not wrongly interpreted as ArrayBufferView|string
-  for (const badParams of [
+  for (const badBuffer of [
     undefined, null, true, 42, 42n, Symbol('42'), NaN, [],
     {},
     { buffer: 'amNotParam' },
@@ -62,26 +64,29 @@ async function testValid(dest, params) {
     { toString() { return 'amObject'; } },
     { [Symbol.toPrimitive]: (hint) => 'amObject' },
   ]) {
-    await testInvalid(dest, 'ERR_INVALID_ARG_TYPE', badParams);
+    await testInvalid(dest, 'ERR_INVALID_ARG_TYPE', badBuffer, {});
   }
 
-  // Various invalid params
-  await testInvalid(dest, 'ERR_OUT_OF_RANGE', { buffer, length: 5 });
-  await testInvalid(dest, 'ERR_OUT_OF_RANGE', { buffer, offset: 5 });
-  await testInvalid(dest, 'ERR_OUT_OF_RANGE', { buffer, length: 1, offset: 3 });
-  await testInvalid(dest, 'ERR_OUT_OF_RANGE', { buffer, length: -1 });
-  await testInvalid(dest, 'ERR_OUT_OF_RANGE', { buffer, offset: -1 });
+  // First argument (buffer or string) is mandatory
+  await testInvalid(dest, 'ERR_INVALID_ARG_TYPE');
 
-  // Test compatibility with filehandle.read counterpart with reused params
-  for (const params of [
-    { buffer },
-    { buffer, length: 1 },
-    { buffer, position: 5 },
-    { buffer, length: 1, position: 5 },
-    { buffer, length: 1, position: -1, offset: 2 },
-    { buffer, length: null },
-    { buffer, offset: 1 },
+  // Various invalid options
+  await testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { length: 5 });
+  await testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { offset: 5 });
+  await testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { length: 1, offset: 3 });
+  await testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { length: -1 });
+  await testInvalid(dest, 'ERR_OUT_OF_RANGE', buffer, { offset: -1 });
+
+  // Test compatibility with filehandle.read counterpart
+  for (const options of [
+    {},
+    { length: 1 },
+    { position: 5 },
+    { length: 1, position: 5 },
+    { length: 1, position: -1, offset: 2 },
+    { length: null },
+    { offset: 1 },
   ]) {
-    await testValid(dest, params);
+    await testValid(dest, buffer, options);
   }
 })().then(common.mustCall());
