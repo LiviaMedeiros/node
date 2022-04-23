@@ -30,7 +30,7 @@ async function testValid(position) {
   }
 }
 
-async function testInvalid(code, position, skipCb = false) {
+async function testInvalid(code, position, internalCatch = false) {
   let fdSync;
   try {
     fdSync = fs.openSync(filepath, 'r');
@@ -46,23 +46,40 @@ async function testInvalid(code, position, skipCb = false) {
     if (fdSync) fs.closeSync(fdSync);
   }
 
-  // Allows to skip Callback API test for uncatchable cases (for example, EINVAL)
-  if (skipCb) return;
-
-  fs.open(filepath, 'r', common.mustSucceed((fd) => {
-    try {
-      assert.throws(
-        () => fs.read(fd, buffer, offset, length, position, common.mustNotCall()),
-        { code }
-      );
-      assert.throws(
-        () => fs.read(fd, { buffer, offset, length, position }, common.mustNotCall()),
-        { code }
-      );
-    } finally {
-      fs.close(fd, common.mustSucceed());
-    }
-  }));
+  // Set this flag for catching errors via first argument of callback function
+  if (internalCatch) {
+    fs.open(filepath, 'r', common.mustSucceed((fd) => {
+      try {
+        fs.read(fd, buffer, offset, length, position, (err, ...results) => {
+          console.log('err:', err);
+          console.log('results:', results);
+          assert.strictEqual(err.code, code);
+        });
+        fs.read(fd, { buffer, offset, length, position }, (err, ...results) => {
+          console.log('err:', err);
+          console.log('results:', results);
+          assert.strictEqual(err.code, code);
+        });
+      } finally {
+        fs.close(fd, common.mustSucceed());
+      }
+    }));
+  } else {
+    fs.open(filepath, 'r', common.mustSucceed((fd) => {
+      try {
+        assert.throws(
+          () => fs.read(fd, buffer, offset, length, position, common.mustNotCall()),
+          { code }
+        );
+        assert.throws(
+          () => fs.read(fd, { buffer, offset, length, position }, common.mustNotCall()),
+          { code }
+        );
+      } finally {
+        fs.close(fd, common.mustSucceed());
+      }
+    }));
+  }
 }
 
 {
@@ -81,7 +98,7 @@ async function testInvalid(code, position, skipCb = false) {
 
   await testValid(2n ** 63n - 1n - BigInt(length));
   await testInvalid('ERR_OUT_OF_RANGE', 2n ** 63n);
-  await testInvalid('ERR_OUT_OF_RANGE', 2n ** 63n - BigInt(length));
+  await testInvalid('EINVAL', 2n ** 63n - BigInt(length), true);
 
   await testInvalid('ERR_OUT_OF_RANGE', NaN);
   await testInvalid('ERR_OUT_OF_RANGE', -Infinity);
