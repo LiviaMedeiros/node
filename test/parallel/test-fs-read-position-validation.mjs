@@ -11,23 +11,43 @@ const buffer = Buffer.from('xyz\n');
 const offset = 0;
 const length = buffer.byteLength;
 
-async function testValid(position) {
+// allowedErrors is an array of acceptable internal errors
+// For example, on some platforms read syscall might return -EFBIG
+async function testValid(position, allowedErrors = []) {
   let fdSync;
-  fs.open(filepath, 'r', common.mustSucceed((fd) => {
-    try {
-      fs.read(fd, buffer, offset, length, position, common.mustSucceed());
-      fs.read(fd, { buffer, offset, length, position }, common.mustSucceed());
-    } finally {
-      fs.close(fd, common.mustSucceed());
-    }
-  }));
   try {
     fdSync = fs.openSync(filepath, 'r');
     fs.readSync(fdSync, buffer, offset, length, position);
     fs.readSync(fdSync, buffer, { offset, length, position });
+  } catch (err) {
+    if (!allowedErrors.includes(err.code)) {
+      assert.fail(err);
+    }
   } finally {
     if (fdSync) fs.closeSync(fdSync);
   }
+
+  fs.open(filepath, 'r', common.mustSucceed((fd) => {
+    try {
+      if (allowedErrors.length) {
+        fs.read(fd, buffer, offset, length, position, common.mustCall((err, ...results) => {
+          if (err && !allowedErrors.includes(err.code)) {
+            assert.fail(err);
+          }
+        }));
+        fs.read(fd, { buffer, offset, length, position }, common.mustCall((err, ...results) => {
+          if (err && !allowedErrors.includes(err.code)) {
+            assert.fail(err);
+          }
+        }));
+      } else {
+        fs.read(fd, buffer, offset, length, position, common.mustSucceed());
+        fs.read(fd, { buffer, offset, length, position }, common.mustSucceed());
+      }
+    } finally {
+      fs.close(fd, common.mustSucceed());
+    }
+  }));
 }
 
 async function testInvalid(code, position, internalCatch = false) {
@@ -51,13 +71,9 @@ async function testInvalid(code, position, internalCatch = false) {
     fs.open(filepath, 'r', common.mustSucceed((fd) => {
       try {
         fs.read(fd, buffer, offset, length, position, (err, ...results) => {
-          console.log('err:', err);
-          console.log('results:', results);
           assert.strictEqual(err.code, code);
         });
         fs.read(fd, { buffer, offset, length, position }, (err, ...results) => {
-          console.log('err:', err);
-          console.log('results:', results);
           assert.strictEqual(err.code, code);
         });
       } finally {
@@ -94,11 +110,12 @@ async function testInvalid(code, position, internalCatch = false) {
   await testValid(1n);
   await testValid(9);
   await testValid(9n);
-  await testValid(Number.MAX_SAFE_INTEGER);
+  await testValid(Number.MAX_SAFE_INTEGER, [ 'EFBIG' ]);
 
-  await testValid(2n ** 63n - 1n - BigInt(length));
+  await testValid(2n ** 63n - 1n - BigInt(length), [ 'EFBIG' ]);
   await testInvalid('ERR_OUT_OF_RANGE', 2n ** 63n);
-  await testValid(2n ** 63n - BigInt(length));
+
+  // TODO: test `2n ** 63n - BigInt(length)`
 
   await testInvalid('ERR_OUT_OF_RANGE', NaN);
   await testInvalid('ERR_OUT_OF_RANGE', -Infinity);
