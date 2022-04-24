@@ -98,7 +98,7 @@ async function testInvalid(code, position, internalCatch = false) {
 
   await testValid(2n ** 63n - 1n - BigInt(length));
   await testInvalid('ERR_OUT_OF_RANGE', 2n ** 63n);
-  await testInvalid('EINVAL', 2n ** 63n - BigInt(length), true);
+  await testValid(2n ** 63n - BigInt(length));
 
   await testInvalid('ERR_OUT_OF_RANGE', NaN);
   await testInvalid('ERR_OUT_OF_RANGE', -Infinity);
