@@ -519,6 +519,48 @@ function mustNotCall(msg) {
   };
 }
 
+const _mustNotMutateProxies = new WeakMap();
+
+function mustNotMutate(object) {
+  if (object === null ||
+      typeof object !== 'object' && typeof object !== 'function')
+    return object;
+
+  const cachedProxy = _mustNotMutateProxies.get(object);
+  if (cachedProxy) {
+    return cachedProxy;
+  }
+
+  const _mustNotMutateHandler = {
+    defineProperty(target, property, descriptor) {
+      assert.fail(`Expected no side effects, got ${util.inspect(property)} ` +
+                  'defined');
+    },
+    deleteProperty(target, property) {
+      assert.fail(`Expected no side effects, got ${util.inspect(property)} ` +
+                  'deleted');
+    },
+    get(target, prop, receiver) {
+      return mustNotMutate(Reflect.get(target, prop, receiver));
+    },
+    preventExtensions(target) {
+      assert.fail('Expected no side effects, got extensions prevented on ' +
+                  util.inspect(target));
+    },
+    set(target, property, value, receiver) {
+      assert.fail(`Expected no side effects, got ${util.inspect(value)} ` +
+                  `assigned to ${util.inspect(property)}`);
+    },
+    setPrototypeOf(target, prototype) {
+      assert.fail(`Expected no side effects, got set prototype to ${prototype}`);
+    }
+  };
+
+  const proxy = new Proxy(object, _mustNotMutateHandler);
+  _mustNotMutateProxies.set(object, proxy);
+  return proxy;
+}
+
 function printSkipMessage(msg) {
   console.log(`1..0 # Skipped: ${msg}`);
 }
@@ -824,6 +866,7 @@ const common = {
   mustCall,
   mustCallAtLeast,
   mustNotCall,
+  mustNotMutate,
   mustSucceed,
   nodeProcessAborted,
   PIPE,

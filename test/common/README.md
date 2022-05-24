@@ -299,6 +299,14 @@ If `fn` is not provided, an empty function will be used.
 Returns a function that triggers an `AssertionError` if it is invoked. `msg` is
 used as the error message for the `AssertionError`.
 
+### `mustNotMutate(object)`
+
+* `object` [\<Object>][<Object>] | [\<Function>][<Function>]
+* return [\<Object>][<Object>] | [\<Function>][<Function>]
+
+Returns a proxy object that triggers an `AssertionError` on mutation attempt,
+including mutation of deeply nested objects.
+
 ### `mustSucceed([fn])`
 
 * `fn` [\<Function>][<Function>] default = () => {}
