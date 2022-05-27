@@ -30,9 +30,9 @@ function testValid(message, ...options) {
 
 testValid('Not passing in any object');
 testValid('Passing in a null', null);
-testValid('Passing in an empty object', {});
-testValid('Passing in an object', {
+testValid('Passing in an empty object', common.mustNotMutate({}));
+testValid('Passing in an object', common.mustNotMutate({
   offset: 0,
   length: bufferAsOption.byteLength,
   position: 0,
-});
+}));
