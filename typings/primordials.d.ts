@@ -187,6 +187,8 @@ declare namespace primordials {
   export const DataViewPrototypeSetInt32: UncurryThis<typeof DataView.prototype.setInt32>
   export const DataViewPrototypeGetUint32: UncurryThis<typeof DataView.prototype.getUint32>
   export const DataViewPrototypeSetUint32: UncurryThis<typeof DataView.prototype.setUint32>
+  export const DataViewPrototypeGetFloat32: UncurryThis<typeof DataView.prototype.getFloat16>
+  export const DataViewPrototypeSetFloat32: UncurryThis<typeof DataView.prototype.setFloat16>
   export const DataViewPrototypeGetFloat32: UncurryThis<typeof DataView.prototype.getFloat32>
   export const DataViewPrototypeSetFloat32: UncurryThis<typeof DataView.prototype.setFloat32>
   export const DataViewPrototypeGetFloat64: UncurryThis<typeof DataView.prototype.getFloat64>

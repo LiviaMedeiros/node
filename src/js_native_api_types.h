@@ -99,6 +99,7 @@ typedef enum {
   napi_uint8_clamped_array,
   napi_int16_array,
   napi_uint16_array,
+  napi_float16_array,
   napi_int32_array,
   napi_uint32_array,
   napi_float32_array,
