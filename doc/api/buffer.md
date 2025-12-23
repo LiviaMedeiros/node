@@ -1516,6 +1516,41 @@ appropriate for `Buffer.from()` variants.
 [`Buffer.from(string)`][] may also use the internal `Buffer` pool like
 [`Buffer.allocUnsafe()`][] does.
 
+### Static method: `Buffer.fromBase64(base64string[, options])`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* `base64string` {string} A base64 string to decode.
+* `options` {Object}
+  * `alphabet` {string} One of `'base64'` (default) or `'base64url'`.
+  * `lastChunkHandling` {string} One of `'loose'` (default), `'strict'`, or `'stop-before-partial'`.
+* Returns: {Buffer}
+
+This static method is same as [`Uint8Array.fromBase64()`][], except it
+returns `Buffer` rather than `Uint8Array`.
+
+This is not exactly the same as `Buffer.from(base64string, 'base64')`,
+and this function will throw `SyntaxError` if input contains non-base64 symbols,
+and returned `Buffer` is always unpooled.
+
+### Static method: `Buffer.fromHex(string)`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* `string` {string} A hexadecimal string to decode.
+* Returns: {Buffer}
+
+This static method is same as [`Uint8Array.fromHex()`][], except it
+returns `Buffer` rather than `Uint8Array`.
+
+This is not exactly the same as `Buffer.from(hexstring, 'hex')`,
+and this function will throw `SyntaxError` if input contains non-hex symbols,
+and returned `Buffer` is always unpooled.
+
 ### Static method: `Buffer.isBuffer(obj)`
 
 <!-- YAML
@@ -5847,6 +5882,8 @@ or after startup, if the alignment has to hold at run time.
 [`TypedArray.prototype.set()`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set
 [`TypedArray.prototype.slice()`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
 [`TypedArray.prototype.subarray()`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/subarray
+[`Uint8Array.fromBase64()`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
+[`Uint8Array.fromHex()`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
 [`blob.stream()`]: #blobstream
 [`buf.buffer`]: #bufbuffer
 [`buf.byteOffset`]: #bufbyteoffset

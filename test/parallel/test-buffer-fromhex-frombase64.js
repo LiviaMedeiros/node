@@ -1,0 +1,55 @@
+'use strict';
+require('../common');
+const assert = require('assert');
+const { Buffer } = require('buffer');
+
+// Buffer.fromBase64 and Buffer.fromHex must be aligned with Uint8Array counterparts
+
+assert(Buffer.isBuffer(Buffer.fromHex('f00dcafe')));
+assert(Buffer.isBuffer(Buffer.fromBase64('SGVsbG8=')));
+
+assert.deepStrictEqual(Buffer.fromHex('f00dcafe'), Buffer.from('f00dcafe', 'hex'));
+assert.deepStrictEqual(Buffer.fromHex('F00DCAFE'), Buffer.from('f00dcafe', 'hex'));
+assert.deepStrictEqual(Buffer.fromHex(''), Buffer.from('', 'hex'));
+
+assert.throws(() => Buffer.fromHex('0x'), { name: 'SyntaxError' });
+assert.throws(() => Buffer.fromHex('a'), { name: 'SyntaxError' });
+assert.throws(() => Buffer.fromHex(123), { name: 'TypeError' });
+assert.throws(() => Buffer.fromHex('abggcd00'), { name: 'SyntaxError' });
+
+assert.deepStrictEqual(Buffer.fromBase64('SGVsbG8='), Buffer.from('SGVsbG8=', 'base64'));
+assert.deepStrictEqual(Buffer.fromBase64('SGV sbG8='), Buffer.from('SGVsbG8=', 'base64'));
+
+assert.deepStrictEqual(
+  Buffer.fromBase64('PGJsZXA-PC9ibGVwPg', { alphabet: 'base64url' }),
+  Buffer.from('PGJsZXA+PC9ibGVwPg==', 'base64'),
+);
+
+assert.deepStrictEqual(Buffer.fromBase64('SGVsbG8=', { lastChunkHandling: 'strict' }), Buffer.from('Hello'));
+assert.throws(() => Buffer.fromBase64('SGVsbG8', { lastChunkHandling: 'strict' }), { name: 'SyntaxError' });
+
+assert.deepStrictEqual(
+  Buffer.fromBase64('SGVsbG8', { lastChunkHandling: 'stop-before-partial' }),
+  Buffer.from('SGVs', 'base64'),
+);
+
+assert.throws(() => Buffer.fromBase64('SGV$sbG8=', {}), { name: 'SyntaxError' });
+assert.throws(() => Buffer.fromBase64('S', {}), { name: 'SyntaxError' });
+assert.throws(() => Buffer.fromBase64(123), { name: 'TypeError' });
+assert.throws(() => Buffer.fromBase64('SGVsbG8=', { alphabet: 'unknown' }), { name: 'TypeError' });
+
+// Test that returned buffer is unpooled
+assert.strictEqual(Buffer.fromBase64('aa').buffer.byteLength,
+                   Buffer.fromBase64('aa').byteLength);
+assert.strictEqual(Buffer.fromBase64('aa'.repeat(2048)).buffer.byteLength,
+                   Buffer.fromBase64('aa'.repeat(2048)).byteLength);
+assert.strictEqual(Buffer.fromBase64('aa '.repeat(2048)).buffer.byteLength,
+                   Buffer.fromBase64('aa '.repeat(2048)).byteLength);
+assert.strictEqual(Buffer.fromBase64('aa'.repeat(65536)).buffer.byteLength,
+                   Buffer.fromBase64('aa'.repeat(65536)).byteLength);
+assert.strictEqual(Buffer.fromHex('aa').buffer.byteLength,
+                   Buffer.fromHex('aa').byteLength);
+assert.strictEqual(Buffer.fromHex('aa'.repeat(2048)).buffer.byteLength,
+                   Buffer.fromHex('aa'.repeat(2048)).byteLength);
+assert.strictEqual(Buffer.fromHex('aa'.repeat(65536)).buffer.byteLength,
+                   Buffer.fromHex('aa'.repeat(65536)).byteLength);
