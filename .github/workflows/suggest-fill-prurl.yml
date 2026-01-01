@@ -1,0 +1,23 @@
+name: Suggest PR URL
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  suggest-fill-prurl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+        with:
+          persist-credentials: false
+      - run: ./tools/actions/suggest-fill-prurl.mjs
+        env:
+          # GH_TOKEN: ${{ secrets.GH_USER_TOKEN }
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.number }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
