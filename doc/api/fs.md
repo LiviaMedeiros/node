@@ -126,6 +126,9 @@ try {
 <!-- YAML
 added: v10.0.0
 changes:
+  - version: REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/FILLME
+    description: dummy change
   - version: v14.0.0
     pr-url: https://github.com/nodejs/node/pull/31553
     description: Exposed as `require('fs/promises')`.
