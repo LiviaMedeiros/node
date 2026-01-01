@@ -33,12 +33,13 @@ if (!res.ok) {
 }
 
 const files = await res.json();
+console.log(files);
 
 const comments = files.flatMap(({ status, filename, patch }) => {
   if (!patch || !['added', 'modified'].includes(status)) {
     return [];
   }
-
+console.log(patch);
   return patch.split('\n').map((line, position) => {
     if (!placeholderReg.test(line)) {
       return false;
@@ -56,7 +57,7 @@ const comments = files.flatMap(({ status, filename, patch }) => {
     };
   }).filter(Boolean);
 });
-
+console.log(comments);
 if (comments.length) {
   const payload = {
     comments,
