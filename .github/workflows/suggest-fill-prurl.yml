@@ -2,7 +2,7 @@ name: Suggest PR URL
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   pull-requests: write
@@ -17,7 +17,7 @@ jobs:
       - run: ./tools/actions/suggest-fill-prurl.mjs
         env:
           # GH_TOKEN: ${{ secrets.GH_USER_TOKEN }
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.number }}
           REPO: ${{ github.repository }}
           SHA: ${{ github.sha }}
