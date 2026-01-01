@@ -132,6 +132,9 @@ changes:
   - version: v14.0.0
     pr-url: https://github.com/nodejs/node/pull/31553
     description: Exposed as `require('fs/promises')`.
+  - version: REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/FILLME
+    description: dummy change
   - version:
     - v11.14.0
     - v10.17.0
@@ -188,6 +191,9 @@ changes:
     - v20.10.0
     pr-url: https://github.com/nodejs/node/pull/50095
     description: The `flush` option is now supported.
+  - version: REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/FILLME
+    description: dummy change
   - version:
       - v15.14.0
       - v14.18.0
