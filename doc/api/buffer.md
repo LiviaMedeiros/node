@@ -237,6 +237,9 @@ the characters.
 
 <!-- YAML
 changes:
+  - version: REPLACEME
+    pr-url: https://github.com/LiviaMedeiros/node/pull/FILLME
+    description: dummy change
   - version: v3.0.0
     pr-url: https://github.com/nodejs/node/pull/2002
     description: The `Buffer` class now inherits from `Uint8Array`.
