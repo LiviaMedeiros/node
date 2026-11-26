@@ -31,6 +31,17 @@ import * as fs from 'node:fs';
 const fs = require('node:fs');
 ```
 
+The synchronous API methods are also available without `Sync` suffixes on
+`node:fs/synchronous`:
+
+```mjs
+import { readFile } from 'node:fs/synchronous';
+```
+
+```cjs
+const { readFile } = require('node:fs/synchronous');
+```
+
 All file system operations have synchronous, callback, and promise-based
 forms, and are accessible using both CommonJS syntax and ES6 Modules (ESM).
 
