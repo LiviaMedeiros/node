@@ -114,7 +114,14 @@ if (showProgress) {
   const cpuCore = cli.getCpuCoreSetting();
   let child;
   if (cpuCore !== null) {
-    const spawnArgs = ['-c', cpuCore, cli.optional[job.binary], resolvedPath, ...cli.optional.set];
+    const spawnArgs = [
+      '-c',
+      cpuCore,
+      cli.optional[job.binary],
+      '--disable-warning=ExperimentalWarning',
+      resolvedPath,
+      ...cli.optional.set,
+    ];
     child = spawn('taskset', spawnArgs, {
       env: process.env,
       stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
@@ -122,6 +129,7 @@ if (showProgress) {
   } else {
     child = fork(resolvedPath, cli.optional.set, {
       execPath: cli.optional[job.binary],
+      execArgv: ['--disable-warning=ExperimentalWarning', ...process.execArgv],
     });
   }
 

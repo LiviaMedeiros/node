@@ -107,7 +107,10 @@ function runBenchmark(n) {
     const child = fork(
       fullBenchmarkPath,
       [`n=${n}`],
-      { stdio: ['inherit', 'pipe', 'inherit', 'ipc'] },
+      {
+        stdio: ['inherit', 'pipe', 'inherit', 'ipc'],
+        execArgv: ['--disable-warning=ExperimentalWarning', ...process.execArgv],
+      },
     );
 
     const results = [];

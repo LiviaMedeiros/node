@@ -56,13 +56,21 @@ function runBenchmark(filename) {
   const cpuCore = cli.getCpuCoreSetting();
   let child;
   if (cpuCore !== null) {
-    child = spawn('taskset', ['-c', cpuCore, process.execPath, scriptPath, ...args], {
+    child = spawn('taskset', [
+      '-c',
+      cpuCore,
+      process.execPath,
+      '--disable-warning=ExperimentalWarning',
+      scriptPath,
+      ...args,
+    ], {
       stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
     });
   } else {
     child = fork(
       scriptPath,
       args,
+      { execArgv: ['--disable-warning=ExperimentalWarning', ...process.execArgv] },
     );
   }
 
